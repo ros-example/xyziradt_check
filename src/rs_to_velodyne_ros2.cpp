@@ -66,12 +66,18 @@ class RsToVelodyne : public rclcpp::Node
         using std::placeholders::_1;
 
         // subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-        //         "/sensing/lidar/top/pointcloud_raw_ex", 10, std::bind(&RsToVelodyne::rsHandler_XYZIRADT, this, _1));
+        //         "/sensing/lidar/top/pointcloud_raw_ex", rclcpp::QoS{1}, std::bind(&RsToVelodyne::rsHandler_XYZIRADT, this, _1));
 
         subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-                "/sensing/lidar/top/pointcloud_raw_ex", rclcpp::SensorDataQoS().keep_last(5), 
-                std::bind(&RsToVelodyne::rsHandler_XYZIRADT, this, -1)
-                );
+                "/sensing/lidar/top/pointcloud_raw_ex", 
+                    rclcpp::SensorDataQoS().keep_last(5),
+                std::bind(&RsToVelodyne::rsHandler_XYZIRADT, this, _1));
+
+
+        // subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
+        //         "/sensing/lidar/top/pointcloud_raw_ex", rclcpp::SensorDataQoS().keep_last(5), 
+        //         std::bind(&RsToVelodyne::rsHandler_XYZIRADT, this, -1)
+        //         );
                  
     }
 
@@ -87,16 +93,17 @@ class RsToVelodyne : public rclcpp::Node
 
             float intensity      = pc_in->points[point_id].intensity;
             uint16_t ring        = pc_in->points[point_id].ring;
-            uint16_t azimuth     = pc_in->points[point_id].azimuth;
-            uint16_t distance    = pc_in->points[point_id].distance;
-            uint16_t return_type = pc_in->points[point_id].return_type;
-            uint16_t time_stamp  = pc_in->points[point_id].time_stamp;
+            float azimuth     = pc_in->points[point_id].azimuth;
+            float distance    = pc_in->points[point_id].distance;
+            /*uint8_t*/  uint16_t return_type = pc_in->points[point_id].return_type;
+            double time_stamp  = pc_in->points[point_id].time_stamp;
 
             std::cout  <<   " ring : "  << ring ;
             std::cout  <<   " ,azimuth : "  << azimuth ;
             std::cout  <<   " ,distance : "  << distance ;
             std::cout  <<   " ,return_type : "  << return_type ;
-            std::cout  <<   " ,time_stamp : "  << time_stamp << std::endl;
+            std::cout  <<   "    ---  time_stamp : "<< std::fixed << std::setprecision(12)  << time_stamp << std::endl;
+            std::cout.unsetf(std::ios::fixed);
  
         }
     }
