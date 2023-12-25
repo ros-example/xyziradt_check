@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.5)
 project(xyziradt)
 
+find_package(ament_cmake_auto REQUIRED)
+
+ament_auto_find_build_dependencies()
+
 #Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
@@ -22,13 +26,22 @@ include_directories(
   ${PCL_COMMON_INCLUDE_DIRS}
 )
 
-add_executable(${PROJECT_NAME}  src/rs_to_velodyne_ros2.cpp)
-ament_target_dependencies(${PROJECT_NAME} rclcpp sensor_msgs )
-target_link_libraries(${PROJECT_NAME} ${PCL_LIBRARIES})
+# add_executable(${PROJECT_NAME}  src/rs_to_velodyne_ros2.cpp)
+# ament_target_dependencies(${PROJECT_NAME} rclcpp sensor_msgs )
+# target_link_libraries(${PROJECT_NAME} ${PCL_LIBRARIES})
 
+ament_auto_add_executable(${PROJECT_NAME} 
+  src/rs_to_velodyne_ros2.cpp
+)
 
-install(TARGETS
-  ${PROJECT_NAME}
-  DESTINATION lib/${PROJECT_NAME})
+ament_auto_package(
+  INSTALL_TO_SHARE
+  # launch
+  # config
+)
 
-ament_package()
+# install(TARGETS
+#   ${PROJECT_NAME}
+#   DESTINATION lib/${PROJECT_NAME})
+
+# ament_package()

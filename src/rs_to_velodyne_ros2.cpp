@@ -5,6 +5,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <pcl/pcl_config.h>
 
 
 // rslidar和velodyne的格式有微小的区别
@@ -72,13 +73,6 @@ class RsToVelodyne : public rclcpp::Node
                 "/sensing/lidar/top/pointcloud_raw_ex", 
                     rclcpp::SensorDataQoS().keep_last(5),
                 std::bind(&RsToVelodyne::rsHandler_XYZIRADT, this, _1));
-
-
-        // subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-        //         "/sensing/lidar/top/pointcloud_raw_ex", rclcpp::SensorDataQoS().keep_last(5), 
-        //         std::bind(&RsToVelodyne::rsHandler_XYZIRADT, this, -1)
-        //         );
-                 
     }
 
   private:
@@ -99,10 +93,10 @@ class RsToVelodyne : public rclcpp::Node
             double time_stamp  = pc_in->points[point_id].time_stamp;
 
             std::cout  <<   " ring : "  << ring ;
-            std::cout  <<   " ,azimuth : "  << azimuth ;
-            std::cout  <<   " ,distance : "  << distance ;
-            std::cout  <<   " ,return_type : "  << return_type ;
-            std::cout  <<   "    ---  time_stamp : "<< std::fixed << std::setprecision(12)  << time_stamp << std::endl;
+            std::cout  <<   ", azimuth : "  << azimuth;
+            std::cout  <<   ", distance : "  << distance ;
+            std::cout  <<   ", return_type : "  << return_type ;
+            std::cout  <<   "   ---  time_stamp : "<< std::fixed << std::setprecision(12)  << time_stamp << std::endl;
             std::cout.unsetf(std::ios::fixed);
  
         }
@@ -114,34 +108,18 @@ class RsToVelodyne : public rclcpp::Node
         // remove nan point, or the feature assocaion will crash, the surf point will containing nan points
         // pcl remove nan not work normally
         // ROS_ERROR("Containing nan point!");
-        if (pcl_isnan(point.x) || pcl_isnan(point.y) || pcl_isnan(point.z)) {
+        #if 1
+        // if (pcl_isnan(point.x) || pcl_isnan(point.y) || pcl_isnan(point.z)) {
+        if (std::isnan(point.x) || std::isnan(point.y) || std::isnan(point.z)) {
             return true;
         } else {
             return false;
         }
+        #else
+            return true;
+        #endif
     }
 
-#if 0
-    void handle_pc_msg(const pcl::PointCloud<RsPointXYZIRT>::Ptr &pc_in,
-                    const pcl::PointCloud<VelodynePointXYZIRT>::Ptr &pc_out)  const
-    {
-        // to new pointcloud
-        for (int point_id = 0; point_id < pc_in->points.size(); ++point_id) {
-            if (has_nan(pc_in->points[point_id]))
-                continue;
-            VelodynePointXYZIRT new_point;
-            //std::copy(pc->points[point_id].data, pc->points[point_id].data + 4, new_point.data);
-            new_point.x = pc_in->points[point_id].x;
-            new_point.y = pc_in->points[point_id].y;
-            new_point.z = pc_in->points[point_id].z;
-            new_point.intensity = pc_in->points[point_id].intensity;
-            // new_point.ring = pc->points[point_id].ring;
-            // // 计算相对于第一个点的相对时间
-            // new_point.time = float(pc->points[point_id].timestamp - pc->points[0].timestamp);
-            pc_out->points.push_back(new_point);
-        }
-    }
-#endif
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr subscription_;
 };
 
